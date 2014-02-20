@@ -2,7 +2,7 @@ divvy-crossfilter
 =============
 
 ## Summary
-This is a JavaScript project that visualizes Divvy bike trips using the Crossfilter JavaScript library.
+This is a JavaScript project that visualizes Divvy bike trips using Crossfilter.js. Crossfilter is a JavaScript library for exploring large multivariate datasets with fast n-dimensional filtering and grouping of records.
 
 The task is to fork the example of airline on-time performance from flights data demonstrating Crossfilter.js (http://square.github.io/crossfilter/), then refactor the code in order to visualize Divvy bike trips data, which is provided by the 2014 Divvy Data Challenge (http://divvybikes.com/datachallenge).
 
