@@ -4,9 +4,9 @@ divvy-crossfilter
 ## Summary
 This is a JavaScript project that visualizes Divvy bike trips using the Crossfilter JavaScript library.
 
-The task is to fork the example of airline on-time performance flights demonstrating Crossfilter.js (http://square.github.io/crossfilter/), then refactor the code in order to visualize Divvy bike data, which is provided by the 2014 Divvy Data Challenge (http://divvybikes.com/datachallenge).
+The task is to fork the example of airline on-time performance from flights data demonstrating Crossfilter.js (http://square.github.io/crossfilter/), then refactor the code in order to visualize Divvy bike trips data, which is provided by the 2014 Divvy Data Challenge (http://divvybikes.com/datachallenge).
 
-The goal is to complete a working visualization utilizing Crossfilter.js in order to submit an entry by March 11, 2014 at 11:59PM CST.
+The goal is to complete a working visualization utilizing Crossfilter.js and submit an entry by March 11, 2014 at 11:59PM CST.
 
 ---
 
