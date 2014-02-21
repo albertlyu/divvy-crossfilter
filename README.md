@@ -54,3 +54,4 @@ name: station name
 latitude: station latitude
 longitude: station longitude
 dpcapacity: number of total docks at each station as of 2/7/2014
+online date: date the station went live in the system
