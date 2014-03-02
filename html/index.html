@@ -6,89 +6,86 @@
 
 <div id="body">
 
-<a href="https://github.com/square"><img src="../img/logotype.png" width="122" height="31"></a>
-
 <h1>Crossfilter</h1>
 
 <div id="charts">
   <div id="hour-chart" class="chart">
-    <div class="title">Time of Day</div>
+    <div class="title">Start Time of Day</div>
   </div>
   <div id="delay-chart" class="chart">
-    <div class="title">Arrival Delay (min.)</div>
+    <div class="title">Stop Time of Day</div>
   </div>
   <div id="distance-chart" class="chart">
-    <div class="title">Distance (mi.)</div>
+    <div class="title">Trip Duration (Minutes)</div>
   </div>
   <div id="date-chart" class="chart">
     <div class="title">Date</div>
   </div>
 </div>
 
-<aside id="totals"><span id="active">-</span> of <span id="total">-</span> flights selected.</aside>
+<aside id="totals"><span id="active">-</span> of <span id="total">-</span> trips selected.</aside>
 
 <div id="lists">
-  <div id="flight-list" class="list"></div>
+  <div id="trip-list" class="list"></div>
 </div>
 
 <footer>
   <span style="float:right;">
     Released under the <a href="http://www.apache.org/licenses/LICENSE-2.0.html">Apache License 2.0</a>.
-  </span>
-  Copyright 2012 <a href="http://squareup.com">Square, Inc.</a>
+  </span>Copyright 2012 <a href="http://squareup.com">Square, Inc.</a>
 </footer>
 
 </div>
 
-<a href="https://github.com/square/crossfilter"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"></a>
-
-<script src="../js/crossfilter.v1.min.js"></script>
-<script src="../js/d3.v3.min.js"></script>
+<script src="../lib/crossfilter.v1.min.js"></script>
+<script src="../lib/d3.v3.min.js"></script>
+<script src="../js/format.js"></script>
+<script src="../js/chart.js"></script>
 <script>
 
 // (It's CSV, but GitHub Pages only gzip's JSON at the moment.)
-d3.csv("../data/trips.csv", function(error, flights) {
+d3.csv("../data/Divvy_Trips_2013.csv", function(error, trips) {
 
-  // Various formatters.
-  var formatNumber = d3.format(",d"),
-      formatChange = d3.format("+,d"),
-      formatDate = d3.time.format("%B %d, %Y"),
-      formatTime = d3.time.format("%I:%M %p");
-
-  // A nest operator, for grouping the flight list.
+  // A nest operator, for grouping the trip list.
   var nestByDate = d3.nest()
       .key(function(d) { return d3.time.day(d.starttime); });
 
   // A little coercion, since the CSV is untyped.
-  flights.forEach(function(d, i) {
+  trips.forEach(function(d, i) {
     d.index = i;
     d.starttime = new Date(d3.time.format(d.starttime));
-    d.tripduration = +d.tripduration;
-    d.bikeid = +d.bikeid;
+    d.stoptime = new Date(d3.time.format(d.stoptime));
+    d.tripduration = +parseFloat(d.tripduration.replace(',',''));
   });
-  console.log(flights[0].starttime);
-  //console.log(flights[0].stoptime);
-  console.log(flights[0]);
 
   // Create the crossfilter for the relevant dimensions and groups.
-  var flight = crossfilter(flights),
-      all = flight.groupAll(),
-      starttime = flight.dimension(function(d) { return d.starttime; }),
+  var trip = crossfilter(trips),
+      all = trip.groupAll(),
+      starttime = trip.dimension(function(d) { return d.starttime; }),
       startdates = starttime.group(d3.time.day),
-      //stoptime = flight.dimension(function(d) { return d.stoptime; }),
-      //stopdates = stoptime.group(d3.time.day),
-      hour = flight.dimension(function(d) { return d.starttime.getHours() + d.starttime.getMinutes() / 60; }),
-      hours = hour.group(Math.floor),
-      tripduration = flight.dimension(function(d) { return Math.max(0, Math.min(10000, d.tripduration)); }),
-      tripdurations = tripduration.group(function(d) { return Math.floor(d / 10) * 10; });
-      bikeid = flight.dimension(function(d) { return Math.min(1999, d.bikeid); }),
-      bikeids = bikeid.group(function(d) { return Math.floor(d / 50) * 50; });
-
+      starthour = trip.dimension(function(d) { return d.starttime.getHours() + d.starttime.getMinutes() / 60; }),
+      starthours = starthour.group(Math.floor),
+      stoptime = trip.dimension(function(d) { return d.stoptime; }),
+      stopdates = stoptime.group(d3.time.day),
+      stophour = trip.dimension(function(d) { return d.stoptime.getHours() + d.stoptime.getMinutes() / 60; }),
+      stophours = stophour.group(Math.floor),
+      tripduration = trip.dimension(function(d) { return d.tripduration / 60; }),
+      tripdurations = tripduration.group(Math.floor);
+      //bikeid = trip.dimension(function(d) { return Math.min(1999, d.bikeid); }),
+      //bikeids = bikeid.group(function(d) { return Math.floor(d / 50) * 50; });
+    
   var charts = [
 
     barChart()
-        .dimension(hour)
-        .group(hours)
+        .dimension(starthour)
+        .group(starthours)
+      .x(d3.scale.linear()
+        .domain([0, 24])
+        .rangeRound([0, 10 * 24])),
+
+    barChart()
+        .dimension(stophour)
+        .group(stophours)
       .x(d3.scale.linear()
         .domain([0, 24])
         .rangeRound([0, 10 * 24])),
@@ -97,24 +94,17 @@ d3.csv("../data/trips.csv", function(error, flights) {
         .dimension(tripduration)
         .group(tripdurations)
       .x(d3.scale.linear()
-        .domain([-60, 150])
-        .rangeRound([0, 10 * 21])),
-
-    barChart()
-        .dimension(tripduration)
-        .group(tripdurations)
-      .x(d3.scale.linear()
         .domain([0, 2000])
-        .rangeRound([0, 10 * 40])),
+        .rangeRound([0, 10 * 50])),
 
     barChart()
         .dimension(starttime)
         .group(startdates)
         .round(d3.time.day.round)
-      .x(d3.time.scale()
-        .domain([new Date(2001, 0, 1), new Date(2001, 3, 1)])
-        .rangeRound([0, 10 * 90]))
-        .filter([new Date(2001, 1, 1), new Date(2001, 2, 1)])
+        .x(d3.time.scale()
+          .domain([new Date(2013, 5, 27), new Date(2013, 11, 31)])
+          .rangeRound([0, 10 * 90]))
+        .filter([new Date(2013, 6, 1), new Date(2013, 7, 1)])
 
   ];
 
@@ -127,11 +117,11 @@ d3.csv("../data/trips.csv", function(error, flights) {
 
   // Render the initial lists.
   var list = d3.selectAll(".list")
-      .data([flightList]);
+      .data([tripList]);
 
   // Render the total.
   d3.selectAll("#total")
-      .text(formatNumber(flight.size()));
+      .text(formatNumber(trip.size()));
 
   renderAll();
 
@@ -146,17 +136,7 @@ d3.csv("../data/trips.csv", function(error, flights) {
     list.each(render);
     d3.select("#active").text(formatNumber(all.value()));
   }
-
-  // Like d3.time.format, but faster.
-  function parseDate(d) {
-    return new Date(
-        d.substring(5, 9),
-        d.substring(0, 2) - 1,
-        d.substring(2, 4),
-        d.substring(4, 6),
-        d.substring(6, 8));
-  }
-
+  
   window.filter = function(filters) {
     filters.forEach(function(d, i) { charts[i].filter(d); });
     renderAll();
@@ -167,12 +147,12 @@ d3.csv("../data/trips.csv", function(error, flights) {
     renderAll();
   };
 
-  function flightList(div) {
-    var flightsByDate = nestByDate.entries(starttime.top(40));
+  function tripList(div) {
+    var tripsByDate = nestByDate.entries(starttime.top(40));
 
     div.each(function() {
       var date = d3.select(this).selectAll(".date")
-          .data(flightsByDate, function(d) { return d.key; });
+          .data(tripsByDate, function(d) { return d.key; });
 
       date.enter().append("div")
           .attr("class", "date")
@@ -182,36 +162,36 @@ d3.csv("../data/trips.csv", function(error, flights) {
 
       date.exit().remove();
 
-      var flight = date.order().selectAll(".flight")
+      var trip = date.order().selectAll(".trip")
           .data(function(d) { return d.values; }, function(d) { return d.index; });
 
-      var flightEnter = flight.enter().append("div")
-          .attr("class", "flight");
+      var tripEnter = trip.enter().append("div")
+          .attr("class", "trip");
 
-      flightEnter.append("div")
+      tripEnter.append("div")
           .attr("class", "time")
           .text(function(d) { return formatTime(d.starttime); });
 
-      flightEnter.append("div")
+      tripEnter.append("div")
           .attr("class", "origin")
           .text(function(d) { return d.from_station_name; });
 
-      flightEnter.append("div")
+      tripEnter.append("div")
           .attr("class", "destination")
           .text(function(d) { return d.to_station_name; });
 
-      flightEnter.append("div")
+      tripEnter.append("div")
           .attr("class", "distance")
           .text(function(d) { return formatNumber(d.bikeid) + " mi."; });
 
-      flightEnter.append("div")
+      tripEnter.append("div")
           .attr("class", "delay")
           .classed("early", function(d) { return d.delay < 0; })
           .text(function(d) { return formatChange(d.tripduration) + " min."; });
 
-      flight.exit().remove();
+      trip.exit().remove();
 
-      flight.order();
+      trip.order();
     });
   }
 
@@ -409,15 +389,3 @@ d3.csv("../data/trips.csv", function(error, flights) {
 });
 
 </script>
-
-<h2>Fast Multidimensional Filtering for Coordinated Views</h2>
-
-<p><b>Crossfilter</b> is a <a href="https://github.com/square/crossfilter">JavaScript library</a> for exploring large multivariate datasets in the browser. Crossfilter supports extremely fast (&lt;30ms) interaction with coordinated views, even with datasets containing a million or more records; we built it to power analytics for <a href="https://squareup.com/register">Square Register</a>, allowing merchants to slice and dice their payment history fluidly.
-
-<p>Since most interactions only involve a single dimension, and then only small adjustments are made to the filter values, incremental filtering and reducing is significantly faster than starting from scratch. Crossfilter uses sorted indexes (and a few bit-twiddling hacks) to make this possible, dramatically increasing the perfor&shy;mance of live histograms and top-<i>K</i> lists. For more details on how Crossfilter works, see the <a href="https://github.com/square/crossfilter/wiki/API-Reference">API reference</a>.
-
-<h2>Example: Airline on-time performance</h2>
-
-<p>The coordinated visualizations below (built with <a href="http://mbostock.github.com/d3/">D3</a>) show nearly a quarter-million flights from early 2001: part of the <a href="http://stat-computing.org/dataexpo/2009/">ASA Data Expo</a> dataset. The dataset is 5.3MB, so it might take a few seconds to download. Click and drag on any chart to filter by the associated dimension. The table beneath shows the eighty most recent flights that match the current filters; these are the <i>details on demand</i>, anecdotal evidence you can use to weigh different hypotheses.
-
-<p>Some questions to consider: How does time-of-day correlate with <a href="javascript:filter([null, [100, 150], null, null])">arrival delay</a>? Are <a href="javascript:filter([null, null, [1700, 2000], null])">longer</a> or <a href="javascript:filter([null, null, [0, 300], null])">shorter</a> flights more likely to arrive early? What happened on <a href="javascript:filter([null, [80, 150], null, [new Date(2001, 0, 12), new Date(2001, 0, 13)]])">January 12</a>? How do flight patterns differ between <a href="javascript:filter([null, null, null, [new Date(2001, 0, 27), new Date(2001, 0, 29)]])">weekends</a> and <a href="javascript:filter([null, null, null, [new Date(2001, 0, 29), new Date(2001, 1, 3)]])">weekdays</a>, or <a href="javascript:filter([[4, 7], null, null, null])">mornings</a> and <a href="javascript:filter([[21, 24], null, null, null])">nights</a>? <a href="https://github.com/square/crossfilter/tree/gh-pages">Fork this example</a> and try your own data!

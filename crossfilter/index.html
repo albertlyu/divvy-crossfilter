@@ -78,6 +78,7 @@ d3.csv("flights-3m.json", function(error, flights) {
     d.delay = +d.delay;
     d.distance = +d.distance;
   });
+  console.log(flights[0].date);
   console.log(flights[0]);
 
   // Create the crossfilter for the relevant dimensions and groups.

@@ -1,3 +1,9 @@
+// Various formatters.
+var formatNumber = d3.format(",d"),
+	formatChange = d3.format("+,d"),
+	formatDate = d3.time.format("%B %d, %Y"),
+	formatTime = d3.time.format("%I:%M %p");
+
 function formatNumberToInt(number) {
 	format = d3.format("0,000");
 	newNumber = format(Math.round(number))
