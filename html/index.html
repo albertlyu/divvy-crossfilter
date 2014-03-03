@@ -7,10 +7,20 @@
 <div id="body">
 
 <h1>Crossfiltering Divvy Bike Trip Data</h1>
+<h2>by Albert Lyu</h2>
+
+<p>Compare: 
+
+<p><a href="javascript:filter([null, null, [1,6], null, null, null])">Weekdays</a>, <a href="javascript:filter([null, null, [0,1], null, null, null])">Sundays</a>, and <a href="javascript:filter([null, null, [6,7], null, null, null])">Saturdays</a>? <a href="javascript:filter([null, null, null, [5,9], null, null])">Summer</a> and <a href="javascript:filter([null, null, null, [9,12], null, null])">Winter</a>? <a href="javascript:filter([[5,9], null, null, null, null, null])">Mornings</a> and <a href="javascript:filter([[20,24], null, null, null, null, null])">Nights</a>?
+
+<p><a href="javascript:filter([null, null, null, null, [0,5], null])">Trips less than 5 minutes</a>, <a href="javascript:filter([null, null, null, null, [5,20], null])">Trips between 5 and 20 minutes</a>, and <a href="javascript:filter([null, null, null, null, [20, 200], null])">Trips over 20 minutes</a>?
 
 <div id="charts">
   <div id="starthour-chart" class="chart">
-    <div class="title">Hour of Day Trip Started</div>
+    <div class="title">Hour of Day Divvy Trip Started</div>
+  </div>
+  <div id="stophour-chart" class="chart">
+    <div class="title">Hour of Day Divvy Trip Ended</div>
   </div>
   <div id="dayofweek-chart" class="chart">
     <div class="title">Day of the Week</div>
@@ -78,8 +88,6 @@ d3.csv("../data/Divvy_Trips_2013.csv", function(error, trips) {
 
       tripduration = trip.dimension(function(d) { return d.tripduration / 60; }),
       tripdurations = tripduration.group(Math.floor);
-      //bikeid = trip.dimension(function(d) { return Math.min(1999, d.bikeid); }),
-      //bikeids = bikeid.group(function(d) { return Math.floor(d / 50) * 50; });
     
   var charts = [
 
@@ -90,12 +98,12 @@ d3.csv("../data/Divvy_Trips_2013.csv", function(error, trips) {
         .domain([0, 24])
         .rangeRound([0, 10 * 24])),
 
-    /*barChart()
+    barChart()
         .dimension(stophour)
         .group(stophours)
       .x(d3.scale.linear()
         .domain([0, 24])
-        .rangeRound([0, 10 * 24])),*/
+        .rangeRound([0, 10 * 24])),
 
     barChart()
         .dimension(startday)
@@ -123,9 +131,9 @@ d3.csv("../data/Divvy_Trips_2013.csv", function(error, trips) {
         .group(startdates)
         .round(d3.time.day.round)
         .x(d3.time.scale()
-          .domain([new Date(2013, 5, 27), new Date(2013, 11, 31)])
+          .domain([new Date(2013, 5, 27), new Date(2014, 0, 1)])
           .rangeRound([0, 10 * 100]))
-        .filter([new Date(2013, 6, 1), new Date(2013, 11, 1)])
+        .filter([new Date(2013, 5, 27), new Date(2014, 0, 1)])
 
   ];
 
@@ -179,7 +187,7 @@ d3.csv("../data/Divvy_Trips_2013.csv", function(error, trips) {
           .attr("class", "date")
         .append("div")
           .attr("class", "day")
-          .text(function(d) { return formatDate(d.values[0].starttime); });
+          .text(function(d) { return getDayOfWeek(d.values[0].starttime) + " " + formatDate(d.values[0].starttime); });
 
       date.exit().remove();
 
@@ -191,7 +199,7 @@ d3.csv("../data/Divvy_Trips_2013.csv", function(error, trips) {
 
       tripEnter.append("div")
           .attr("class", "time")
-          .text(function(d) { return formatTime(d.starttime); });
+          .text(function(d) { return formatTime(d.starttime) + "-" + formatTime(d.stoptime); });
 
       tripEnter.append("div")
           .attr("class", "origin")
@@ -202,13 +210,8 @@ d3.csv("../data/Divvy_Trips_2013.csv", function(error, trips) {
           .text(function(d) { return d.to_station_name; });
 
       tripEnter.append("div")
-          .attr("class", "distance")
-          .text(function(d) { return formatNumber(d.bikeid) + " mi."; });
-
-      tripEnter.append("div")
-          .attr("class", "delay")
-          .classed("early", function(d) { return d.delay < 0; })
-          .text(function(d) { return formatChange(d.tripduration) + " min."; });
+          .attr("class", "duration")
+          .text(function(d) { return formatNumberToInt((d.tripduration) / 60) + " min."; });
 
       trip.exit().remove();
 

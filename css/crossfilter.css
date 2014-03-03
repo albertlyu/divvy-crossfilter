@@ -90,6 +90,10 @@ h1, h2 {
   width: 260px;
 }
 
+#stophour-chart {
+  width: 260px;
+}
+
 #dayofweek-chart {
   width: 150px;
 }
@@ -118,23 +122,27 @@ h1, h2 {
 #trip-list .trip {
   line-height: 1.5em;
   background: #eee;
-  width: 640px;
+  width: 850px;
   margin-bottom: 1px;
-}
-
-#trip-list .time {
-  color: #999;
 }
 
 #trip-list .trip div {
   display: inline-block;
+  width: 250px;
+}
+
+#trip-list div.dayofweek {
   width: 100px;
 }
 
-#trip-list div.distance,
-#trip-list div.delay {
-  width: 160px;
-  padding-right: 10px;
+#trip-list div.time {
+  color: #999;
+  width: 150px;
+}
+
+#trip-list div.duration {
+  width: 75px;
+  padding-right: 5px;
   text-align: right;
 }
 
