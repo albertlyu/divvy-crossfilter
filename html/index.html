@@ -1,21 +1,24 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
-<title>Crossfilter</title>
+<title>Divvy Bike Crossfilter</title>
 
 <link type="text/css" href="../css/crossfilter.css" rel="stylesheet" charset="utf-8" />
 
 <div id="body">
 
-<h1>Crossfilter</h1>
+<h1>Crossfiltering Divvy Bike Trip Data</h1>
 
 <div id="charts">
-  <div id="hour-chart" class="chart">
-    <div class="title">Start Time of Day</div>
+  <div id="starthour-chart" class="chart">
+    <div class="title">Hour of Day Trip Started</div>
   </div>
-  <div id="delay-chart" class="chart">
+  <div id="dayofweek-chart" class="chart">
     <div class="title">Day of the Week</div>
   </div>
-  <div id="distance-chart" class="chart">
+  <div id="startmonth-chart" class="chart">
+    <div class="title">Month of the Year</div>
+  </div>
+  <div id="duration-chart" class="chart">
     <div class="title">Trip Duration (Minutes)</div>
   </div>
   <div id="date-chart" class="chart">
@@ -23,16 +26,14 @@
   </div>
 </div>
 
-<aside id="totals"><span id="active">-</span> of <span id="total">-</span> trips selected.</aside>
+<aside id="totals"><span id="active">-</span> of <span id="total">-</span> Divvy trips selected</aside>
 
 <div id="lists">
   <div id="trip-list" class="list"></div>
 </div>
 
 <footer>
-  <span style="float:right;">
-    Released under the <a href="http://www.apache.org/licenses/LICENSE-2.0.html">Apache License 2.0</a>.
-  </span>Copyright 2012 <a href="http://squareup.com">Square, Inc.</a>
+  Copyright 2014 Albert Lyu
 </footer>
 
 </div>
@@ -68,13 +69,12 @@ d3.csv("../data/Divvy_Trips_2013.csv", function(error, trips) {
       starthours = starthour.group(Math.floor),
       startday = trip.dimension(function(d) { return d.starttime.getDay(); }),
       startdays = startday.group(Math.floor),
+      startmonth = trip.dimension(function(d) { return d.starttime.getMonth(); }),
+      startmonths = startmonth.group(Math.floor),
 
       stoptime = trip.dimension(function(d) { return d.stoptime; }),
-      stopdates = stoptime.group(d3.time.day),
       stophour = trip.dimension(function(d) { return d.stoptime.getHours() + d.stoptime.getMinutes() / 60; }),
       stophours = stophour.group(Math.floor),
-      stopday = trip.dimension(function(d) { return d.stoptime.getDay(); }),
-      stopdays = stopday.group(Math.floor),
 
       tripduration = trip.dimension(function(d) { return d.tripduration / 60; }),
       tripdurations = tripduration.group(Math.floor);
@@ -98,18 +98,25 @@ d3.csv("../data/Divvy_Trips_2013.csv", function(error, trips) {
         .rangeRound([0, 10 * 24])),*/
 
     barChart()
-        .dimension(stopday)
-        .group(stopdays)
+        .dimension(startday)
+        .group(startdays)
       .x(d3.scale.linear()
         .domain([0, 7])
         .rangeRound([0, 10 * 7])),
 
     barChart()
+        .dimension(startmonth)
+        .group(startmonths)
+      .x(d3.scale.linear()
+        .domain([0, 12])
+        .rangeRound([0, 10 * 12])),
+
+    barChart()
         .dimension(tripduration)
         .group(tripdurations)
       .x(d3.scale.linear()
-        .domain([0, 2000])
-        .rangeRound([0, 10 * 50])),
+        .domain([0, 200])
+        .rangeRound([0, 10 * 100])),
 
     barChart()
         .dimension(starttime)
@@ -117,8 +124,8 @@ d3.csv("../data/Divvy_Trips_2013.csv", function(error, trips) {
         .round(d3.time.day.round)
         .x(d3.time.scale()
           .domain([new Date(2013, 5, 27), new Date(2013, 11, 31)])
-          .rangeRound([0, 10 * 90]))
-        .filter([new Date(2013, 6, 1), new Date(2013, 7, 1)])
+          .rangeRound([0, 10 * 100]))
+        .filter([new Date(2013, 6, 1), new Date(2013, 11, 1)])
 
   ];
 

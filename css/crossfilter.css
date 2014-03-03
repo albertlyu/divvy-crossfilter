@@ -17,7 +17,7 @@ footer {
 }
 
 h1 {
-  font-size: 96px;
+  font-size: 48px;
   margin-top: .3em;
   margin-bottom: 0;
 }
@@ -86,16 +86,20 @@ h1, h2 {
   stroke: #666;
 }
 
-#hour-chart {
+#starthour-chart {
   width: 260px;
 }
 
-#delay-chart {
-  width: 230px;
+#dayofweek-chart {
+  width: 150px;
 }
 
-#distance-chart {
-  width: 420px;
+#startmonth-chart {
+  width: 200px;
+}
+
+#duration-chart {
+  width: 920px;
 }
 
 #date-chart {
