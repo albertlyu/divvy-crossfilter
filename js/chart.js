@@ -1,6 +1,7 @@
-function crossfilterTrip(trip) {
+function crossfilterTrip(trips) {
     // Create the crossfilter for the relevant dimensions and groups.
-    var all = trip.groupAll(),
+	var trip = crossfilter(trips)
+		all = trip.groupAll(),
         starttime = trip.dimension(function (d) {
             return d.starttime;
         }),

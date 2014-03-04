@@ -13,11 +13,8 @@ function loadData() {
 			d.tripduration = +parseFloat(d.tripduration.replace(',',''));
 		});
 
-		 // Create the crossfilter for trips
-		var trip = crossfilter(trips);
-
-		// Render facts from crossfilter
-		crossfilterTrip(trip);
+		// Crossfilter and render charts
+		crossfilterTrip(trips);
 
 	});
 }

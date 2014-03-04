@@ -9,9 +9,23 @@
 <h1>Crossfiltering Divvy Bike Trip Data</h1>
 <h2>by Albert Lyu</h2>
 
-<p><a href="javascript:filter([null, null, [1,6], null, null, null])">Weekdays</a>, <a href="javascript:filter([null, null, [6,7], null, null, null])">Saturdays</a>, and <a href="javascript:filter([null, null, [0,1], null, null, null])">Sundays</a>? <a href="javascript:filter([null, null, null, [5,9], null, null])">Summer</a> and <a href="javascript:filter([null, null, null, [9,12], null, null])">Winter</a>? <a href="javascript:filter([[5,9], null, null, null, null, null])">Mornings</a> and <a href="javascript:filter([[20,24], null, null, null, null, null])">Nights</a>?
+<p>
+  <a href="javascript:filter([null, null, [1,6], null, null, null])">Weekdays</a>, 
+  <a href="javascript:filter([null, null, [6,7], null, null, null])">Saturdays</a>, or 
+  <a href="javascript:filter([null, null, [0,1], null, null, null])">Sundays</a>? 
+  <a href="javascript:filter([null, null, null, [5,9], null, null])">Summer</a> or 
+  <a href="javascript:filter([null, null, null, [9,12], null, null])">Winter</a>?
 
-<p><a href="javascript:filter([null, null, null, null, [0,5], null])">Trips less than 5 minutes</a>, <a href="javascript:filter([null, null, null, null, [5,20], null])">Trips between 5 and 20 minutes</a>, and <a href="javascript:filter([null, null, null, null, [20, 200], null])">Trips over 20 minutes</a>?
+<p>
+  <a href="javascript:filter([[0,6], null, null, null, null, null])">Early mornings</a>, 
+  <a href="javascript:filter([[6,12], null, null, null, null, null])">Mornings</a>, 
+  <a href="javascript:filter([[12,18], null, null, null, null, null])">Afternoons</a>, or 
+  <a href="javascript:filter([[18,24], null, null, null, null, null])">Evenings</a>?
+
+<p>
+  <a href="javascript:filter([null, null, null, null, [0,5], null])">Trips less than 5 minutes</a>, 
+  <a href="javascript:filter([null, null, null, null, [5,20], null])">Trips between 5 and 20 minutes</a>, or 
+  <a href="javascript:filter([null, null, null, null, [20, 200], null])">Trips over 20 minutes</a>?
 
 <div id="charts">
   <div id="starthour-chart" class="chart">
@@ -53,7 +67,21 @@
 <script src="../js/format.js"></script>
 <script>
 
-loadData();
+  // (It's CSV, but GitHub Pages only gzip's JSON at the moment.)
+  d3.csv("../data/Divvy_Trips_2013.csv", function(error, trips) {
+
+    // A little coercion, since the CSV is untyped.
+    trips.forEach(function(d, i) {
+      d.index = i;
+      d.starttime = new Date(d3.time.format(d.starttime));
+      d.stoptime = new Date(d3.time.format(d.stoptime));
+      d.tripduration = +parseFloat(d.tripduration.replace(',',''));
+    });
+
+    // Crossfilter and render charts
+    crossfilterTrip(trips);
+
+  });
 
 
 </script>
