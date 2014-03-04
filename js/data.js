@@ -2,6 +2,27 @@ function loadData() {
 
 	// read data files
 
+	// (It's CSV, but GitHub Pages only gzip's JSON at the moment.)
+	d3.csv("../data/Divvy_Trips_2013.csv", function(error, trips) {
+
+		// A little coercion, since the CSV is untyped.
+		trips.forEach(function(d, i) {
+			d.index = i;
+			d.starttime = new Date(d3.time.format(d.starttime));
+			d.stoptime = new Date(d3.time.format(d.stoptime));
+			d.tripduration = +parseFloat(d.tripduration.replace(',',''));
+		});
+
+		 // Create the crossfilter for trips
+		var trip = crossfilter(trips);
+
+		// Render facts from crossfilter
+		crossfilterTrip(trip);
+
+	});
+}
+
+	/* save for later
 	// divvy stations
 	d3.text("../data/Divvy_Stations_2013.csv", function(error, data) {
 		console.log("loadStationData");
@@ -80,8 +101,8 @@ function loadData() {
 
 
 
-	});
-}
+	});*/	
+
 
 function distance(lat1, lon1, lat2, lon2, unit) {
     var radlat1 = Math.PI * lat1/180
@@ -99,88 +120,3 @@ function distance(lat1, lon1, lat2, lon2, unit) {
     return dist
 } // see http://www.geodatasource.com/developers/javascript
 
-
-function createRange(days) {
-//console.log("createRange");
-	var range = {
-		dayRange: days+1,
-		days: [],
-		metrics:{}
-	};
-	return range;
-}
-
-function getSummary(days,extent,impact) {
-	var	startIndex = Math.floor((extent[0]-days[0].date)/86400000),
-		endIndex = Math.floor((extent[1]-days[0].date)/86400000),
-		countDays = endIndex-startIndex+1
-	;
-
-	var group = {
-		calls: {
-			count: {
-				all: 0
-			},
-			sum: {
-				primary: 0,
-				secondary: 0,
-				requests: 0,
-				influenced: 0
-			},
-			average: {
-				primary: 0,
-				secondary: 0,
-				requests: 0
-			}
-		},
-	};
-
-	var summary = {
-		control: jQuery.extend(true, {}, group),
-		test: jQuery.extend(true, {}, group)
-	};
-
-	for (var i=startIndex; i<=endIndex; i++) {
-		var metrics = days[i].metrics;
-		summary.control.calls.count.all += metrics.CntCalls_Control_NR;
-		summary.test.calls.count.all += metrics.CntCalls_Test_Inf + metrics.CntCalls_Test_NR + metrics.CntCalls_Test_NA;
-		summary.test.calls.sum.influenced += metrics.CntCalls_Test_Inf;
-
-		summary.control.calls.sum.primary += metrics.SumPrimaryKPI_Control_NR;
-		summary.test.calls.sum.primary += metrics.SumPrimaryKPI_Test_Inf + metrics.SumPrimaryKPI_Test_NR + metrics.SumPrimaryKPI_Test_NA;
-
-		summary.control.calls.sum.requests += metrics.CntRouteRequests_Control_NR;
-		summary.test.calls.sum.requests += metrics.CntRouteRequests_Test_Inf + metrics.CntRouteRequests_Test_NR + metrics.CntRouteRequests_Test_NA;
-
-		summary.control.calls.sum.secondary += metrics.SumSecondaryKPI_Control_NR;
-		summary.test.calls.sum.secondary  += metrics.SumSecondaryKPI_Test_Inf + metrics.SumSecondaryKPI_Test_NR + metrics.SumSecondaryKPI_Test_NA;
-	}
-
-	//For each group calculate the averages
-	_(summary).keys().forEach(function(k) {
-		summary[k].calls.average.primary = summary[k].calls.sum.primary / summary[k].calls.count.all;
-		summary[k].calls.average.secondary = summary[k].calls.sum.secondary / summary[k].calls.count.all;
-		summary[k].calls.average.influenced = summary[k].calls.sum.influenced / summary[k].calls.count.all;
-	});
-
-
-	summary.delta = {
-		average: {
-			primary: (summary.control.calls.average.primary - summary.test.calls.average.primary) / summary.control.calls.average.primary,
-			secondary: (summary.test.calls.average.secondary - summary.control.calls.average.secondary) / summary.control.calls.average.secondary,
-		},
-		sum: {
-			impact: Math.floor((summary.control.calls.average.primary - summary.test.calls.average.primary) * summary.control.calls.count.all * 7/countDays),
-			secondary: summary.test.calls.average.secondary - summary.control.calls.average.secondary
-		}
-	}
-
-	//Calculate summary.delta if primary kpi / focus metric is a unit of time or not
-	if (impact == 'time') {
-		summary.delta.sum.impact = summary.control.calls.average.primary - summary.test.calls.average.primary
-	} else {
-		summary.delta.sum.impact = Math.floor((summary.control.calls.average.primary - summary.test.calls.average.primary) * summary.control.calls.count.all * 7/countDays)
-	}
-	
-	return summary;
-}

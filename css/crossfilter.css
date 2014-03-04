@@ -99,15 +99,15 @@ h1, h2 {
 }
 
 #startmonth-chart {
-  width: 200px;
+  width: 150px;
 }
 
 #duration-chart {
-  width: 920px;
+  width: 800px;
 }
 
 #date-chart {
-  width: 920px;
+  width: 800px;
 }
 
 #trip-list {
@@ -122,7 +122,7 @@ h1, h2 {
 #trip-list .trip {
   line-height: 1.5em;
   background: #eee;
-  width: 850px;
+  width: 800px;
   margin-bottom: 1px;
 }
 
