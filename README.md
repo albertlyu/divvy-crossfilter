@@ -8,6 +8,8 @@ The task is to fork the example of airline on-time performance from flights data
 
 The goal is to complete a working visualization utilizing Crossfilter.js and submit an entry by March 11, 2014 at 11:59PM CST.
 
+Update 3/13/2014: You can view the visualization at http://albertlyu.github.io/divvy-crossfilter/ if you're interested. However, due to the limitation of crossfilter.js in efficiently processing 750,000+ rows from a csv file, it may take 3-5 minutes for the visualization to load. Feel free to submit an issue or a pull request if you come up with a faster way to load the visualization. Also, at some point, I do hope to add a page loading widget of some sort. Perhaps http://demos.jquerymobile.com/1.2.1/docs/pages/loader.html or something.
+
 ---
 
 ## Data
